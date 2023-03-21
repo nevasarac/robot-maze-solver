@@ -46,6 +46,9 @@ if __name__ == '__main__':
     robot_location = (0,0)
     target_location = (len(matrix)-1,len(matrix[0])-1)
 
+
+    # define the heuristic function
+
     def h(point, goal):
         return abs(point[0] - goal[0]) + abs(point[1] - goal[1])
 
