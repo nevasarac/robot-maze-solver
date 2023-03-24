@@ -33,8 +33,9 @@ def print_matrix(matrix: list):
         len_of_row = len(matrix[0])
         # print("-"*(2*len_of_row-1))
         for row in matrix:
-            print("|".join(row))
+            print("".join(row))
             # print("-" * (2 * len_of_row - 1))
+
 
 
 def print_matrix_2():
@@ -54,12 +55,12 @@ def print_matrix_2():
 
 if __name__ == '__main__':
 
-    url_resp = get_url(url_1)
+    url_resp = get_url(url_2)
     matrix = get_matrix_from_text(url_resp)
 
     robot_location = (0,0)
     target_location = (len(matrix)-1,len(matrix[0])-1)
-    matrix[0][1]="1"
+
     def h(point, goal):
         return abs(point[0] - goal[0]) + abs(point[1] - goal[1])
 
@@ -103,4 +104,9 @@ if __name__ == '__main__':
     else:
         shortest_path = []
 
-    print_matrix_2()
+    #print_matrix_2()
+    for sp in shortest_path:
+
+        matrix[sp[0]][sp[1]]="X"
+        print_matrix(matrix)
+        time.sleep(1)
