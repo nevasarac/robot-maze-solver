@@ -1,102 +1,106 @@
-import tkinter as tk
-import turtle
 import requests
+import os
+import time
+from heapq import heappop, heappush
 
-#gui açma yeri
-pencere = tk.Tk()
-pencere.title('PROJE')
-pencere.geometry('850x850+500+100')
+url_1 = 'http://bilgisayar.kocaeli.edu.tr/prolab2/url1.txt'
+url_2 = 'http://bilgisayar.kocaeli.edu.tr/prolab2/url2.txt'
 
-#Kalem Oluştur
-class Pen(turtle.Turtle):
-    def __init__(self):
-        turtle.Turtle.__init__(self)
-        self.shape("square")
-        self.color("blue")
-        self.penup()
-        self.speed(0)
+def get_url(url):
+    resp_body = None
+    resp = requests.get(url)
+    if resp and resp.status_code == 200:
+        resp_body = resp.text
+    return resp_body
 
-class Player(turtle.Turtle):
-    def __init__(self):
-        turtle.Turtle.__init__(self)
-        self.shape("square")
-        self.color("white")
-        self.penup()
-        self.speed(0)
+def get_matrix_from_text(matrix_text: str):
+    main_matrix = []
+    rows = matrix_text.split('\n')
+    for row in rows:
+        tmp = []
+        for char in row:
+            tmp.append(char)
+        main_matrix.append(tmp.copy())
+    return main_matrix
 
-#dosya 1 i okuma fonksiyonu
-def oku1():
-    dosya = requests.get("http://bilgisayar.kocaeli.edu.tr/prolab2/url1.txt")
-    liste = str(dosya.text).splitlines()
-    liste1 = list()
-    for i in range(len(liste)):
-        tmp = list()
-        for j in range(len(liste[i])):
-            tmp.append(int(liste[i][j]))
-        liste1.append(tmp.copy())
+def clear_screen():
+    # print('\n'*80)
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-    setup_maze(liste1)
-
-
-#dosya 2 yi okuma fonksiyonu
-def oku2():
-    dosya = requests.get("http://bilgisayar.kocaeli.edu.tr/prolab2/url2.txt")
-    liste=str(dosya.text).splitlines()
-    liste1=list()
-    for i in range(len(liste)):
-        tmp=list()
-        for j in range(len(liste[i])):
-            tmp.append(int(liste[i][j]))
-        liste1.append(tmp.copy())
-
-    setup_maze(liste1)
-
-def setup_maze(liste1):
-    arayuz = turtle.Screen()
-    arayuz.bgcolor("black")
-    arayuz.title("GEZGİN ROBOT PROJESİ")
-    arayuz.setup(750, 750)
-
-    for y in range(len(liste1)):
-        for x in range(len(liste1[y])):
-            character = liste1[y][x]
-            screen_x = -288 + (x * 24)
-            screen_y = 288 - (y * 24)
-
-            # X olup olmadığını kontrol et (duvarı temsil ediyor)
-            if character == 1 or 2 or 3:
-                pen.goto(screen_x, screen_y)
-                pen.stamp()
-
-            if character == 0:
-                player.goto(screen_x, screen_y)
-                player.stamp()
+def print_matrix(matrix: list):
+    clear_screen()
+    if matrix:
+        len_of_row = len(matrix[0])
+        # print("-"*(2*len_of_row-1))
+        for row in matrix:
+            print("|".join(row))
+            # print("-" * (2 * len_of_row - 1))
 
 
-#Sınıf örnekleri oluştur
-pen = Pen()
-player=Player()
-
-#buton 1 tanımlama yeri
-buton=tk.Button(pencere,text='url1.txt',fg='white',background='black',command=oku1) #URL'i öyle direk set yapılabilir ama free text bir alanda lazım anlatacağım.
-buton.place(
-    x=50,
-    y=30,
-    height=30,
-    width=60
-)
-
-#buton 2 tanımlama yeri
-buton=tk.Button(pencere,text='url2.txt',fg='white',background='black',command=oku2)
-buton.place(
-    x=50,
-    y=70,
-    height=30,
-    width=60
-)
-
-#pencere oluşturma yeri
-pencere.mainloop()
+def print_matrix_2():
+    # Printing the labyrinth and the shortest path
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            if (i, j) in shortest_path:
+                print("X", end="")
+            # elif matrix[i][j] == 0:
+            #      print(".", end="")
+            #  else:
+            #      print("1", end="")
+            else:
+                print(matrix[i][j], end="")
+        print("")
 
 
-#TODO: if __main__ =  kullanılmlaı.
+if __name__ == '__main__':
+
+    url_resp = get_url(url_1)
+    matrix = get_matrix_from_text(url_resp)
+
+    robot_location = (0,0)
+    target_location = (len(matrix)-1,len(matrix[0])-1)
+    matrix[0][1]="1"
+    def h(point, goal):
+        return abs(point[0] - goal[0]) + abs(point[1] - goal[1])
+
+    # A* algorithm
+    open_list = []
+    heappush(open_list, (0, robot_location))
+    closed_set = set()
+    g = {robot_location: 0}
+    f = {robot_location: h(robot_location, target_location)}
+    previous = {}
+    while open_list:
+        _, cell = heappop(open_list)
+        if cell == target_location:
+            path = []
+            while cell in previous:
+                path.append(cell)
+                cell = previous[cell]
+            path.append(robot_location)
+            path.reverse()
+            break
+        closed_set.add(cell)
+        for direction in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            next_cell = (cell[0] + direction[0], cell[1] + direction[1])
+            if next_cell[0] < 0 or next_cell[0] >= len(matrix) or next_cell[1] < 0 or next_cell[1] >= len(matrix[0]):
+                continue
+
+            if matrix[next_cell[0]][next_cell[1]] in ('1','2','3'):# 0 ise bu yoldan gitmiyor
+                continue
+            cost = g[cell] + 1
+            if next_cell in closed_set and cost >= g.get(next_cell, 0):
+                continue
+            if cost < g.get(next_cell, 0) or next_cell not in [i[1] for i in open_list]:
+                previous[next_cell] = cell
+                g[next_cell] = cost
+                f[next_cell] = cost + h(next_cell, target_location)
+                heappush(open_list, (f[next_cell], next_cell))
+
+    # Finding the shortest path
+    if target_location in path:
+        shortest_path = [robot_location] + path
+    else:
+        shortest_path = []
+
+    print_matrix_2()
