@@ -83,6 +83,16 @@ def draw_path(canvas, shortest_path):
         x2 = shortest_path[i+1][1] * 20 + 10
         y2 = shortest_path[i+1][0] * 20 + 10
         canvas.create_line(x1, y1, x2, y2, fill="blue", width=5)
+
+
+
+def change_url():
+    global current_url
+    current_url = (current_url + 1) % len(urls)
+    button.config(text=urls[current_url])
+
+
+
 if __name__ == '__main__':
 
     url_resp = get_url(url_2)
@@ -141,6 +151,13 @@ if __name__ == '__main__':
         print_matrix(matrix)
         time.sleep(1)
 
-    create_window(matrix)
-    draw_maze(matrix)
-    draw_path(shortest_path)
+
+    urls = ["http://bilgisayar.kocaeli.edu.tr/prolab2/url1.txt", "http://bilgisayar.kocaeli.edu.tr/prolab2/url2.txt"]
+    current_url = 0
+
+    root = tk.Tk()
+    root.title('PROJE')
+    root.geometry('850x850+500+100')
+    button = tk.Button(root, text=urls[current_url], command=change_url)
+    button.pack()
+    root.mainloop()
