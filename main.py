@@ -5,6 +5,7 @@ import os
 import time
 from heapq import heappop, heappush
 import tkinter as tk
+from datetime import datetime
 
 url_1 = 'http://bilgisayar.kocaeli.edu.tr/prolab2/url1.txt'
 url_2 = 'http://bilgisayar.kocaeli.edu.tr/prolab2/url2.txt'
@@ -108,7 +109,9 @@ def change_url():
 
 
 def run_solver():
+    t1 = datetime.now()
     global shortest_path
+    global delta
     url_resp = get_url(urls[current_url])
     matrix = get_matrix_from_text(url_resp)
 
@@ -170,11 +173,20 @@ def run_solver():
     #     #print_matrix(matrix)
     #     game_lbl.config(text=game_str)
     draw_maze(maze_canvas, matrix)
+    result_info_lbl.config(text="")
 
+    # convert time string to datetime
+
+    t2 = datetime.now()
+
+    # get difference
+    delta = t2 - t1
 
 def show_solve():
     global shortest_path
+    global delta
     draw_path(maze_canvas, shortest_path)
+    result_info_lbl.config(text="Robotun geçtiği kare sayısı : "+str(len(shortest_path))+" Geçen süre : "+str(delta.total_seconds()))
 
 
 if __name__ == '__main__':
@@ -204,5 +216,7 @@ if __name__ == '__main__':
 
     # first_space_lbl = tk.Label(root)
     # first_space_lbl.grid(row=1)
+    result_info_lbl = tk.Label(root)
+    result_info_lbl.grid(row=5, columnspan=2, padx=2, pady=15)
 
     root.mainloop()
