@@ -1,5 +1,5 @@
 from tkinter import ttk
-
+import random
 import requests
 import os
 import time
@@ -28,47 +28,6 @@ def get_matrix_from_text(matrix_text: str):
             tmp.append(char)
         main_matrix.append(tmp.copy())
     return main_matrix
-
-
-def clear_screen():
-    # print('\n'*80)
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
-def print_matrix(matrix: list):
-    clear_screen()
-    if matrix:
-        len_of_row = len(matrix[0])
-        # print("-"*(2*len_of_row-1))
-        for row in matrix:
-            print("".join(row))
-            # print("-" * (2 * len_of_row - 1))
-
-
-def print_matrix_2():
-    # Printing the labyrinth and the shortest path
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            if (i, j) in shortest_path:
-                print("X", end="")
-            # elif matrix[i][j] == 0:
-            #      print(".", end="")
-            #  else:
-            #      print("1", end="")
-            else:
-                print(matrix[i][j], end="")
-        print("")
-
-
-# Create a new window to display the maze
-def create_window(matrix):
-    window = tk.Tk()
-    window.title("Maze")
-    width = len(matrix[0]) * 20
-    height = len(matrix) * 20
-    window.geometry('{}x{}'.format(width, height))
-    return window
-
 
 # Draw maze in the window
 def draw_maze(canvas, matrix):
@@ -114,9 +73,20 @@ def run_solver():
     global delta
     url_resp = get_url(urls[current_url])
     matrix = get_matrix_from_text(url_resp)
-
-    robot_location = (0, 0)
-    target_location = (len(matrix) - 1, len(matrix[0]) - 1)
+    is_found = False
+    while(not is_found):
+        ri = random.randint(0,len(matrix)-1)
+        rj = random.randint(0,len(matrix[0])-1)
+        if matrix[ri][rj] == '0':
+            robot_location = (ri,rj)
+            is_found = True
+    is_found = False
+    while (not is_found):
+        ri = random.randint(0, len(matrix)-1)
+        rj = random.randint(0, len(matrix[0])-1)
+        if matrix[ri][rj] == '0':
+            target_location = (ri, rj)
+            is_found = True
     matrix[robot_location[0]][robot_location[1]] = 'R'
     matrix[target_location[0]][target_location[1]] = 'T'
 
